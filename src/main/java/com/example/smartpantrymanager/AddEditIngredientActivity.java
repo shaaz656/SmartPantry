@@ -1,5 +1,4 @@
 package com.example.smartpantrymanager;
-
 import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.view.MenuItem;
