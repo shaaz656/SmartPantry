@@ -5,7 +5,6 @@ public class PantryItem {
     private double quantity;
     private String unit;
     private String expiry;
-
     public PantryItem(long id, String name, double quantity, String unit, String expiry) {
         this.id = id;
         this.name = name;
@@ -13,7 +12,6 @@ public class PantryItem {
         this.unit = unit;
         this.expiry = expiry == null ? "" : expiry;
     }
-
     public long getId() { return id; }
     public String getName() { return name; }
     public double getQuantity() { return quantity; }

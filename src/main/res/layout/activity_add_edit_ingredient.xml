@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <AutoCompleteTextView
+            android:id="@+id/editName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:completionThreshold="1"
+            android:hint="Ingredient name (start typing for suggestions)"
+            android:inputType="textCapWords"
+            android:minHeight="52dp"
+            android:textColor="@color/text_dark"
+            android:textSize="20sp" />
+
+        <EditText
+            android:id="@+id/editQuantity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:hint="Quantity (e.g. 2 or 250)"
+            android:inputType="numberDecimal"
+            android:minHeight="52dp"
+            android:textColor="@color/text_dark"
+            android:textSize="20sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="Unit"
+            android:textColor="@color/blue_primary"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <Spinner
+            android:id="@+id/spinnerUnit"
+            android:layout_width="match_parent"
+            android:layout_height="52dp" />
+
+        <EditText
+            android:id="@+id/editExpiry"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:focusable="false"
+            android:hint="Expiry date (optional): tap to pick, long-press to clear"
+            android:inputType="none"
+            android:minHeight="52dp"
+            android:textColor="@color/text_dark"
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/buttonSave"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginTop="28dp"
+            android:text="Save"
+            android:textSize="20sp" />
+    </LinearLayout>
+</ScrollView>

@@ -1,34 +1,46 @@
 package com.example.smartpantrymanager;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+
 public class DatabaseHelper extends SQLiteOpenHelper {
+
     private static final String DB_NAME = "smartpantry.db";
-    private static final int DB_VERSION = 1;
+    private static final int DB_VERSION = 2;
+
     public DatabaseHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE pantry (id INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + "name TEXT NOT NULL, quantity REAL NOT NULL, unit TEXT NOT NULL, expiry TEXT)");
+        createRecipeTables(db);
+        seedRecipes(db);
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // Keep the user's pantry; only rebuild the recipe tables with the new recipe list.
+        db.execSQL("DROP TABLE IF EXISTS recipe_ingredients");
+        db.execSQL("DROP TABLE IF EXISTS recipes");
+        createRecipeTables(db);
+        seedRecipes(db);
+    }
+
+    private void createRecipeTables(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE recipes (id INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + "name TEXT NOT NULL, steps TEXT NOT NULL)");
         db.execSQL("CREATE TABLE recipe_ingredients (id INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + "recipe_id INTEGER NOT NULL, name TEXT NOT NULL, quantity REAL NOT NULL, "
                 + "unit TEXT NOT NULL, FOREIGN KEY(recipe_id) REFERENCES recipes(id))");
-        seedRecipes(db);
-    }
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS recipe_ingredients");
-        db.execSQL("DROP TABLE IF EXISTS recipes");
-        db.execSQL("DROP TABLE IF EXISTS pantry");
-        onCreate(db);
     }
     public long insertItem(String name, double quantity, String unit, String expiry) {
         ContentValues cv = new ContentValues();
@@ -40,7 +52,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
     public List<PantryItem> getAllItems() {
         List<PantryItem> list = new ArrayList<>();
-        Cursor c = getReadableDatabase().query("pantry", null, null, null, null, null, "name COLLATE NOCASE");
+        Cursor c = getReadableDatabase().query("pantry", null, null, null, null, null,
+                "name COLLATE NOCASE");
         while (c.moveToNext()) {
             list.add(new PantryItem(c.getLong(0), c.getString(1), c.getDouble(2),
                     c.getString(3), c.getString(4)));
@@ -48,6 +61,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         c.close();
         return list;
     }
+
     public PantryItem getItem(long id) {
         Cursor c = getReadableDatabase().query("pantry", null, "id=?",
                 new String[]{String.valueOf(id)}, null, null, null);
@@ -82,6 +96,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         c.close();
         return recipes;
     }
+
     public Recipe getRecipe(long id) {
         SQLiteDatabase db = getReadableDatabase();
         Cursor c = db.query("recipes", null, "id=?", new String[]{String.valueOf(id)},
@@ -94,13 +109,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         c.close();
         return r;
     }
+
     private void loadIngredients(SQLiteDatabase db, Recipe r) {
         Cursor c = db.query("recipe_ingredients", null, "recipe_id=?",
                 new String[]{String.valueOf(r.getId())}, null, null, null);
         while (c.moveToNext()) {
-            r.getIngredients().add(new RecipeIngredient(c.getString(2), c.getDouble(3), c.getString(4)));
+            r.getIngredients().add(new RecipeIngredient(c.getString(2), c.getDouble(3),
+                    c.getString(4)));
         }
         c.close();
+    }
+
+    public LinkedHashMap<String, String> getKnownIngredients() {
+        LinkedHashMap<String, String> map = new LinkedHashMap<>();
+        Cursor c = getReadableDatabase().rawQuery(
+                "SELECT name, unit FROM recipe_ingredients GROUP BY name ORDER BY name", null);
+        while (c.moveToNext()) {
+            map.put(c.getString(0), c.getString(1));
+        }
+        c.close();
+        return map;
     }
     private void addRecipe(SQLiteDatabase db, String name, String steps, String... ingredients) {
         ContentValues cv = new ContentValues();
@@ -116,7 +144,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             ic.put("unit", p[2]);
             db.insert("recipe_ingredients", null, ic);
         }
-    }    private void seedRecipes(SQLiteDatabase db) {
+    }
+
+    private void seedRecipes(SQLiteDatabase db) {
+        // ----- Dishes adapted from the Delish "lazy dinners" list -----
         addRecipe(db, "Creamy Tuscan Chicken",
                 "1. Season the chicken and sear it in olive oil until golden, then set aside.\n2. Fry the garlic and sun-dried tomatoes for a minute.\n3. Pour in the cream, add salt, and return the chicken.\n4. Simmer 10 minutes until cooked through.",
                 "chicken breast|400|g", "garlic|3|pcs", "sun dried tomato|50|g", "cream|150|ml", "olive oil|1|tbsp", "salt|1|tsp");
@@ -160,9 +191,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "1. Place the cod in a dish with chopped tomatoes and garlic.\n2. Drizzle with olive oil and add lemon slices.\n3. Bake at 190C for 15 minutes.",
                 "cod|2|pcs", "tomato|4|pcs", "garlic|2|pcs", "olive oil|2|tbsp", "lemon|1|pcs");
         addRecipe(db, "Creamy Lemon Herb Chicken",
-                addRecipe(db, "Scrambled Eggs on Toast",
-                        "1. Toast the bread.\n2. Whisk the eggs with salt.\n3. Melt the butter in a pan and scramble the eggs gently.\n4. Pile onto the toast.",
-                        "egg|2|pcs", "bread|2|pcs", "butter|10|g", "salt|1|tsp");
+                "1. Brown the chicken in a pan.\n2. Add cream, lemon juice, garlic and herbs.\n3. Simmer on low for 20 minutes until tender.",
+                "chicken breast|400|g", "cream|150|ml", "lemon|1|pcs", "garlic|2|pcs", "mixed herbs|1|tsp");
+        addRecipe(db, "Marry Me Gnocchi",
+                "1. Fry garlic and sun-dried tomatoes.\n2. Add the cream and cheese and stir until smooth.\n3. Add the gnocchi and cook until they float and the sauce coats them.",
+                "gnocchi|400|g", "cream|150|ml", "sun dried tomato|50|g", "garlic|2|pcs", "cheese|40|g");
+        addRecipe(db, "Pesto Ramen",
+                "1. Cook the instant noodles and drain.\n2. Toss with pesto.\n3. Top with a fried or boiled egg.",
+                "instant noodle|2|pcs", "pesto|2|tbsp", "egg|1|pcs");
+        addRecipe(db, "Brown Sugar BBQ Chicken Rolls",
+                "1. Cook the chicken in BBQ sauce and brown sugar until it falls apart.\n2. Shred it and pile into the rolls.",
+                "chicken breast|400|g", "brown sugar|2|tbsp", "bbq sauce|4|tbsp", "bread roll|2|pcs");
+        addRecipe(db, "One-Pot Lazy Lasagna",
+                "1. Brown the mince in a large pot.\n2. Add the pasta sauce and broken pasta with a little water.\n3. Simmer until the pasta is tender, then top with cheese until melted.",
+                "pasta|250|g", "mince|300|g", "pasta sauce|400|ml", "cheese|100|g");
+        addRecipe(db, "Cube Steak with Gravy",
+                "1. Coat the steak in flour and fry until browned.\n2. Add the sliced onion and stock and simmer into a gravy.\n3. Serve with boiled potatoes.",
+                "cube steak|400|g", "flour|50|g", "onion|1|pcs", "beef stock|300|ml", "potato|4|pcs");
+        addRecipe(db, "Scrambled Eggs on Toast",
+                "1. Toast the bread.\n2. Whisk the eggs with salt.\n3. Melt the butter in a pan and scramble the eggs gently.\n4. Pile onto the toast.",
+                "egg|2|pcs", "bread|2|pcs", "butter|10|g", "salt|1|tsp");
         addRecipe(db, "Cheese Omelette",
                 "1. Beat the eggs with salt.\n2. Melt butter in a pan and pour in the eggs.\n3. Add grated cheese, fold and serve.",
                 "egg|3|pcs", "cheese|50|g", "butter|10|g", "salt|1|tsp");
@@ -184,22 +232,5 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         addRecipe(db, "Cheesy Vegetable Frittata",
                 "1. Fry the sliced onion and pepper in oil.\n2. Beat the eggs with salt and pour over the vegetables.\n3. Top with cheese and cook on low until set, or finish under the grill.",
                 "egg|4|pcs", "onion|1|pcs", "bell pepper|1|pcs", "cheese|50|g", "oil|1|tbsp", "salt|1|tsp");
-                "1. Brown the chicken in a pan.\n2. Add cream, lemon juice, garlic and herbs.\n3. Simmer on low for 20 minutes until tender.",
-                "chicken breast|400|g", "cream|150|ml", "lemon|1|pcs", "garlic|2|pcs", "mixed herbs|1|tsp");
-        addRecipe(db, "Marry Me Gnocchi",
-                "1. Fry garlic and sun-dried tomatoes.\n2. Add the cream and cheese and stir until smooth.\n3. Add the gnocchi and cook until they float and the sauce coats them.",
-                "gnocchi|400|g", "cream|150|ml", "sun dried tomato|50|g", "garlic|2|pcs", "cheese|40|g");
-        addRecipe(db, "Pesto Ramen",
-                "1. Cook the instant noodles and drain.\n2. Toss with pesto.\n3. Top with a fried or boiled egg.",
-                "instant noodle|2|pcs", "pesto|2|tbsp", "egg|1|pcs");
-        addRecipe(db, "Brown Sugar BBQ Chicken Rolls",
-                "1. Cook the chicken in BBQ sauce and brown sugar until it falls apart.\n2. Shred it and pile into the rolls.",
-                "chicken breast|400|g", "brown sugar|2|tbsp", "bbq sauce|4|tbsp", "bread roll|2|pcs");
-        addRecipe(db, "One-Pot Lazy Lasagna",
-                "1. Brown the mince in a large pot.\n2. Add the pasta sauce and broken pasta with a little water.\n3. Simmer until the pasta is tender, then top with cheese until melted.",
-                "pasta|250|g", "mince|300|g", "pasta sauce|400|ml", "cheese|100|g");
-        addRecipe(db, "Cube Steak with Gravy",
-                "1. Coat the steak in flour and fry until browned.\n2. Add the sliced onion and stock and simmer into a gravy.\n3. Serve with boiled potatoes.",
-                "cube steak|400|g", "flour|50|g", "onion|1|pcs", "beef stock|300|ml", "potato|4|pcs");
     }
 }

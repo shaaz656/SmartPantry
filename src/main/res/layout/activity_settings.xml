@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/switchExpiry"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="56dp"
+        android:text="Highlight items that are expiring soon"
+        android:textColor="@color/text_dark"
+        android:textSize="20sp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:lineSpacingExtra="4dp"
+        android:text="Items expiring within 3 days (or already expired) show in red on your pantry list."
+        android:textColor="@color/text_secondary"
+        android:textSize="18sp" />
+</LinearLayout>

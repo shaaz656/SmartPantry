@@ -1,4 +1,5 @@
 package com.example.smartpantrymanager;
+
 import java.util.ArrayList;
 import java.util.List;
 public class Recipe {
@@ -6,6 +7,7 @@ public class Recipe {
     private String name;
     private String steps;
     private List<RecipeIngredient> ingredients = new ArrayList<>();
+
     public Recipe(long id, String name, String steps) {
         this.id = id;
         this.name = name;
