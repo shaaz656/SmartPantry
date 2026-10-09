@@ -112,7 +112,6 @@ public class AddEditIngredientActivity extends AppCompatActivity {
             editQuantity.setError("Quantity must be greater than 0");
             return;
         }
-
         String unit = spinnerUnit.getSelectedItem().toString();
         String expiry = editExpiry.getText().toString().trim();
 
