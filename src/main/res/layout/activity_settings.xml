@@ -2,8 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:padding="20dp">
+    android:padding="24dp">
 
     <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/switchExpiry"
@@ -15,9 +16,10 @@
         android:textSize="20sp" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
+        android:gravity="center"
         android:lineSpacingExtra="4dp"
         android:text="Items expiring within 3 days (or already expired) show in red on your pantry list."
         android:textColor="@color/text_secondary"

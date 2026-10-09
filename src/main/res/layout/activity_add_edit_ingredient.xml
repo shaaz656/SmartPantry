@@ -6,15 +6,17 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:padding="24dp">
 
         <AutoCompleteTextView
             android:id="@+id/editName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:completionThreshold="1"
-            android:hint="Ingredient name (start typing for suggestions)"
+            android:gravity="center"
+            android:hint="Ingredient name"
             android:inputType="textCapWords"
             android:minHeight="52dp"
             android:textColor="@color/text_dark"
@@ -25,16 +27,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
-            android:hint="Quantity (e.g. 2 or 250)"
+            android:gravity="center"
+            android:hint="Quantity"
             android:inputType="numberDecimal"
             android:minHeight="52dp"
             android:textColor="@color/text_dark"
             android:textSize="20sp" />
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
+            android:gravity="center"
             android:text="Unit"
             android:textColor="@color/blue_primary"
             android:textSize="20sp"
@@ -43,7 +47,8 @@
         <Spinner
             android:id="@+id/spinnerUnit"
             android:layout_width="match_parent"
-            android:layout_height="52dp" />
+            android:layout_height="52dp"
+            android:gravity="center" />
 
         <EditText
             android:id="@+id/editExpiry"
@@ -51,11 +56,21 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
             android:focusable="false"
-            android:hint="Expiry date (optional): tap to pick, long-press to clear"
+            android:gravity="center"
+            android:hint="Expiry date (optional)"
             android:inputType="none"
             android:minHeight="52dp"
             android:textColor="@color/text_dark"
             android:textSize="20sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="center"
+            android:text="Tap to pick a date, long-press to clear"
+            android:textColor="@color/text_secondary"
+            android:textSize="16sp" />
 
         <Button
             android:id="@+id/buttonSave"
